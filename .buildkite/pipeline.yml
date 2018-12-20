@@ -10,15 +10,23 @@ steps:
   # Staging release
   - wait
   - name: "Deploy to ECS Staging cluster"
-    command: /usr/local/bin/ecs-deploy -c demo-staging -n nginx-staging-service -i 457557654038.dkr.ecr.ap-southeast-1.amazonaws.com/nginx:`${BUILDKITE_COMMIT::6}` -p poc --skip-deployments-check -t 240
+    command: .buildkite/deploy.sh -c demo-staging -s nginx-staging-service -a 457557654038 -p poc
     branches: master
   - wait
-   # Production release
+   # Green Production release
    # wait for unblock by team member
-  - block: ":red_button: Trigger Production Release :red_button:"
+  - block: ":red_button: Trigger Green Production Release :red_button:"
     branches: master
 
-  - name: ":rocket: Deploying to ECS Production Green"
-    command: /usr/local/bin/ecs-deploy -c demo-prod -n nginx-prod-service -i 457557654038.dkr.ecr.ap-southeast-1.amazonaws.com/nginx:`${BUILDKITE_COMMIT::6}` -p poc --skip-deployments-check -t 240
+  - name: ":rocket: Deploying to ECS Green Production"
+    command:  .buildkite/deploy.sh -c demo-prod -s nginx-prod-service -a 457557654038 -p poc
     branches: master
 
+   # Blue Production release
+   # wait for unblock by team member
+  - block: ":red_button: Trigger Blue Production Release :red_button:"
+    branches: master
+
+  - name: ":rocket: Switching Green to Blue Production"
+    command:  .buildkite/blue-green-flip.sh
+    branches: master
