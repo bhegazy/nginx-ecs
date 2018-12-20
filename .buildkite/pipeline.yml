@@ -10,7 +10,7 @@ steps:
   # Staging release
   - wait
   - name: "Deploy to ECS Staging cluster"
-    command: /usr/local/bin/ecs-deploy -c demo-staging -n nginx-staging-service -i 457557654038.dkr.ecr.ap-southeast-1.amazonaws.com/nginx:${BUILDKITE_COMMIT::6} -p poc -v --skip-deployments-check -t 240
+    command: "/usr/local/bin/ecs-deploy -c demo-staging -n nginx-staging-service -i 457557654038.dkr.ecr.ap-southeast-1.amazonaws.com/nginx:${BUILDKITE_COMMIT::6} -p poc -v --skip-deployments-check -t 240"
     branches: master
   - wait
    # Production release
@@ -19,6 +19,6 @@ steps:
     branches: master
 
   - name: ":rocket: Deploying to ECS Production Green"
-    command: ecs-deploy -c demo-prod -n nginx-prod-service -i 457557654038.dkr.ecr.ap-southeast-1.amazonaws.com/nginx:${BUILDKITE_COMMIT::6} -p poc -v --skip-deployments-check -t 240
+    command: "/usr/local/bin/ecs-deploy -c demo-prod -n nginx-prod-service -i 457557654038.dkr.ecr.ap-southeast-1.amazonaws.com/nginx:${BUILDKITE_COMMIT::6} -p poc -v --skip-deployments-check -t 240"
     branches: master
 
