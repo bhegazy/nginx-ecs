@@ -1,6 +1,5 @@
 terraform {
   backend "s3" {
-    bucket  = "bill-poc-terraform-state"
     key     = "poc/terraform.tfstate"
     region  = "ap-southeast-1"
     encrypt = true
@@ -20,9 +19,7 @@ provider "null" {
   version = "~> 1.0.0"
 }
 
-variable "ssh_pubkey_file" {
-  default = "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAACAQDXFxpJFAXb8e3U7QnfPc7GdbXX9LzWDhrTo4Vh9O4z2yJyDKgmS3Ffj1yyHZ8Fw8frI5D9emdN7ZEgANUNx6aDJCTFNZb0AqF/3QwkezApzLixYfwh4wv7oDqcmSXho9JFB7GhYH3B8CjEEf+GW1qoXoStfSYDyozlhcJy1jekWmQF3tY4VSiMNV+yiSIu6iBHGYjVgLidQpDxmZOnkikc85lkQ1RcZ9NLoCdvSUSAL4dLsgvDlxwStPARWP/QW1W5+i7h9Y+saN5L35vbkAadwrENx+KTp2pfgnoAZMO/I8iESu7a/4zL/EpATvFDBcH+CZLEPHvyzQizQwfrT74vaYXGNq+r5eoFYQdpHaHtKbb5stFWAjVwfcTndNnCLlGdIefbrTcusrcSAD6t3e+iO9G4pebAQtkSNesKhs8cZaOGaXb2UxkAUV/YwOG9a8RHTs2Nz4oaPRFxQAinip5/N/FH+PVwoglZmPaGVhGgI7t0Mumvr7JJ2bHzGCD8stiMvpbIfMnVomoYeTEWnyDQNNu7r9mwy6Sy7R/j02w18QOZ71r/rR9cDxwrOFoHjmZJ7gvd06hBRhH/JarbCQpPanGcjP4NeI46PIA0ujvv4yCriL/ffYL/AZzLs8vqzoQdlwk7I9T9NrwL2M5LQiBnUBFOvEYzvAjcqiLqEdOqTw=="
-}
+variable "ssh_pubkey_file" {}
 
 variable "key_name" {
   default = "ecs-key"
