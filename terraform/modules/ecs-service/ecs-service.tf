@@ -1,15 +1,3 @@
-variable "name" {}
-variable "environment" {}
-variable "ecs_cluster" {}
-variable "task_def_arn" {}
-variable "desired_count" {}
-variable "iam_role" {}
-variable "lb_target_group_arn" {}
-
-variable "container_port" {
-  default = 80
-}
-
 resource "aws_ecs_service" "service" {
   name            = "${var.name}-${var.environment}-service"
   cluster         = "${var.ecs_cluster}"
@@ -23,8 +11,10 @@ resource "aws_ecs_service" "service" {
   }
 
   load_balancer {
-    target_group_arn = "${var.lb_target_group_arn}"
+    target_group_arn = "${aws_alb_target_group.default.arn}"
     container_name   = "${var.name}-${var.environment}"
     container_port   = "${var.container_port}"
   }
+
+  depends_on = ["aws_alb.alb", "aws_alb_target_group.default"]
 }
