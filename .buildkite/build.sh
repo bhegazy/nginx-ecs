@@ -37,11 +37,15 @@ rm -rf /tmp/${BUILDKITE_PIPELINE_SLUG}
 
 # tag docker image
 docker tag ${IMAGE}:${TAG} ${DOCKER_REPO}/${IMAGE}:${TAG}
+docker tag ${IMAGE}:${TAG} ${DOCKER_REPO}/${IMAGE}:latest
 
 # push to repository
 echo "--- Pushing :docker: image ${DOCKER_REPO}/${IMAGE}:${TAG} to registry"
 docker push ${DOCKER_REPO}/${IMAGE}:${TAG}
+echo "--- Pushing :docker: image ${DOCKER_REPO}/${IMAGE}:latest to registry"
+docker push ${DOCKER_REPO}/${IMAGE}:latest
 
 # local clean up
-echo "--- Cleaning up :docker: image ${DOCKER_REPO}/${IMAGE}:${TAG}"
+echo "--- Cleaning up :docker: image ${DOCKER_REPO}/${IMAGE}:${TAG} and ${DOCKER_REPO}/${IMAGE}:latest"
 docker rmi -f ${DOCKER_REPO}/${IMAGE}:${TAG}
+docker rmi -f ${DOCKER_REPO}/${IMAGE}:latest
