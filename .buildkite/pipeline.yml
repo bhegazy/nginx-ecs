@@ -19,7 +19,7 @@ steps:
     branches: master
 
   - name: ":rocket: Deploying to ECS Green Production"
-    command:  .buildkite/deploy.sh -c demo-prod -s nginx-prod-service -a 457557654038 -p poc
+    command:  .buildkite/deploy.sh -c demo-prod -s nginx-prod-green -a 457557654038 -p poc
     branches: master
 
    # Blue Production release
