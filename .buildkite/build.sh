@@ -2,7 +2,7 @@
 set -xe
 
 # set docker repository
-DOCKER_REPO=457557654038.dkr.ecr.ap-southeast-1.amazonaws.com
+DOCKER_REPO=457557654038.dkr.ecr.ap-southeast-2.amazonaws.com
 
 # image name
 IMAGE="nginx"
