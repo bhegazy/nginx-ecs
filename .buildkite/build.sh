@@ -9,7 +9,7 @@ IMAGE="nginx"
 
 AWS=$(which aws)
 echo "--- login to ecr :docker:"
-eval $(${AWS} ecr get-login --no-include-email --region ap-southeast-2)
+eval $(${AWS} ecr get-login --no-include-email --region ap-southeast-2 --profile poc)
 
 # use buildkite commit hash as a TAG
 TAG=${BUILDKITE_COMMIT::6}
