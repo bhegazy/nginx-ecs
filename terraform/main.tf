@@ -8,7 +8,7 @@ terraform {
 
 provider "aws" {
   version = "~> 1.35.0"
-  region  = "ap-southeast-1"
+  region  = "${var.region}"
 }
 
 provider "template" {
@@ -33,14 +33,39 @@ variable "public_subnets" {
   default = "10.80.2.0/24,10.80.4.0/24,10.80.6.0/24"
 }
 
+variable "region" {
+  default = "ap-southeast-1"
+}
+
+data "aws_availability_zones" "all" {}
+
+data "aws_ami" "ecs_ami" {
+  most_recent = true
+
+  filter {
+    name   = "name"
+    values = ["amzn-ami-*-amazon-ecs-optimized"]
+  }
+
+  filter {
+    name   = "owner-alias"
+    values = ["amazon"]
+  }
+
+  filter {
+    name   = "architecture"
+    values = ["x86_64"]
+  }
+
+  filter {
+    name   = "virtualization-type"
+    values = ["hvm"]
+  }
+}
+
 resource "aws_key_pair" "ecs-key" {
   key_name   = "${var.key_name}"
   public_key = "${var.ssh_pubkey_file}"
-}
-
-resource "aws_eip" "nat" {
-  count = 3
-  vpc   = true
 }
 
 /* this module is using verified module from
@@ -49,15 +74,13 @@ resource "aws_eip" "nat" {
 module "vpc" {
   source = "terraform-aws-modules/vpc/aws"
 
-  name                = "main-vpc"
-  cidr                = "10.80.0.0/16"
-  azs                 = ["ap-southeast-1a", "ap-southeast-1b", "ap-southeast-1c"]
-  private_subnets     = ["${split(",", var.private_subnets)}"]
-  public_subnets      = ["${split(",", var.public_subnets)}"]
-  enable_nat_gateway  = true
-  single_nat_gateway  = false
-  reuse_nat_ips       = true
-  external_nat_ip_ids = ["${aws_eip.nat.*.id}"]
+  name               = "main-vpc"
+  cidr               = "10.80.0.0/16"
+  azs                = ["${data.aws_availability_zones.all.names}"]
+  private_subnets    = ["${split(",", var.private_subnets)}"]
+  public_subnets     = ["${split(",", var.public_subnets)}"]
+  enable_nat_gateway = true
+  single_nat_gateway = false
 
   tags = {
     Name        = "poc"
@@ -73,7 +96,7 @@ module "demo-staging-ecs" {
   vpc_cidr           = "${module.vpc.vpc_cidr_block}"
   private_subnet_ids = "${join(",", module.vpc.private_subnets)}"
   key_name           = "${var.key_name}"
-  ami                = "ami-050865a806e0dae53"                    # ap-southeast-1
+  ami                = "${data.aws_ami.ecs_ami.image_id}"
 }
 
 module "demo-prod-ecs" {
@@ -84,7 +107,7 @@ module "demo-prod-ecs" {
   vpc_cidr           = "${module.vpc.vpc_cidr_block}"
   private_subnet_ids = "${join(",", module.vpc.private_subnets)}"
   key_name           = "${var.key_name}"
-  ami                = "ami-050865a806e0dae53"                    # ap-southeast-1
+  ami                = "${data.aws_ami.ecs_ami.image_id}"
 }
 
 module "nginx-ecr" {
@@ -93,44 +116,30 @@ module "nginx-ecr" {
   image_name = "nginx"
 }
 
-module "nginx-ecs-staging-td" {
-  source = "./modules/ecs-task-def"
-
-  name         = "nginx"
-  environment  = "staging"
-  docker_image = "${module.nginx-ecr.ecr_url}"
-}
-
 module "nginx-ecs-staging-svc" {
   source = "./modules/ecs-service"
 
   name              = "nginx"
   environment       = "staging"
+  region            = "${var.region}"
   vpc_id            = "${module.vpc.vpc_id}"
   ecs_cluster       = "${module.demo-staging-ecs.ecs_cluster_arn}"
-  task_def_arn      = "${module.nginx-ecs-staging-td.ecs_td_arn}"
   desired_count     = 1
   iam_role          = "${module.demo-staging-ecs.ecs_iam_role}"
   public_subnet_ids = "${join(",", module.vpc.public_subnets)}"
-}
-
-module "nginx-ecs-prod-td" {
-  source = "./modules/ecs-task-def"
-
-  name         = "nginx"
-  environment  = "prod"
-  docker_image = "${module.nginx-ecr.ecr_url}"
+  docker_image      = "${module.nginx-ecr.ecr_url}"
 }
 
 module "nginx-ecs-prod-svc" {
-  source = "./modules/ecs-service"
+  source = "./modules/ecs-service-blue-green"
 
   name              = "nginx"
   environment       = "prod"
+  region            = "${var.region}"
   vpc_id            = "${module.vpc.vpc_id}"
   ecs_cluster       = "${module.demo-prod-ecs.ecs_cluster_arn}"
-  task_def_arn      = "${module.nginx-ecs-prod-td.ecs_td_arn}"
   desired_count     = 1
   iam_role          = "${module.demo-prod-ecs.ecs_iam_role}"
   public_subnet_ids = "${join(",", module.vpc.public_subnets)}"
+  docker_image      = "${module.nginx-ecr.ecr_url}"
 }

@@ -6,9 +6,14 @@ variable "ecs_cluster" {}
 variable "desired_count" {}
 variable "iam_role" {}
 
-variable "container_port" {
+variable "blue_port" {
   default = 80
 }
 
+variable "green_port" {
+  default = 8080
+}
+
 variable "docker_image" {}
+
 variable "region" {}

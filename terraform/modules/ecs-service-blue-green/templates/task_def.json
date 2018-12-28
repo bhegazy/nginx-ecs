@@ -4,17 +4,17 @@
     "image": "${image}",
     "portMappings": [
       {
-        "containerPort": 80,
-        "hostPort": 80
+        "containerPort": ${container_port},
+        "hostPort": ${host_port}
       }
     ],
     "memory": 128,
-    "networkMode": "host",
+    "networkMode": "bridge",
     "logConfiguration": {
       "logDriver": "awslogs",
       "options": {
         "awslogs-group": "${log_group}",
-        "awslogs-region": "ap-southeast-1",
+        "awslogs-region": "${region}",
         "awslogs-stream-prefix": "${name}"
       }
     }
